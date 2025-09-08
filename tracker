@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>REF Engagement Tracker</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6;
+        }
+        .table-container {
+            overflow-x: auto;
+        }
+        td {
+            padding: 12px;
+        }
+        /* Custom colors for Race Equality First */
+        .text-ref-blue { color: #004b90; }
+        .bg-ref-blue { background-color: #004b90; }
+        .bg-ref-blue-dark { background-color: #003366; }
+        /* Modal styles */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        .modal-content {
+            background-color: white;
+            padding: 24px;
+            border-radius: 8px;
+            max-width: 90%;
+            width: 500px;
+            max-height: 90vh;
+            overflow-y: auto;
+            position: relative;
+        }
+        .modal-close-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            font-size: 24px;
+            font-weight: bold;
+            cursor: pointer;
+            color: #6b7280;
+        }
+    </style>
+</head>
+<body class="p-6">
+
+    <div class="container mx-auto max-w-7xl bg-white p-8 rounded-lg shadow-xl">
+        <header class="text-center mb-10">
+            <h1 class="text-3xl md:text-4xl font-bold text-gray-800">
+                <span class="text-ref-blue">Race Equality First</span> Engagement Tracker
+            </h1>
+            <p class="mt-2 text-lg text-gray-600">
+                Keep track of your outreach and partnership activities.
+            </p>
+        </header>
+
+        <!-- New Entry Form -->
+        <section class="mb-12 p-6 bg-gray-50 rounded-lg shadow-inner">
+            <h2 class="text-2xl font-semibold text-gray-700 mb-4" id="form-title">Add New Entry</h2>
+            <form id="engagement-form" class="space-y-6">
+                <input type="hidden" id="entry-doc-id">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div>
+                        <label for="organization" class="block text-sm font-medium text-gray-700">Organization Name</label>
+                        <input type="text" id="organization" name="organization" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-ref-blue focus:ring focus:ring-ref-blue focus:ring-opacity-50 transition duration-150 ease-in-out px-4 py-2 border">
+                    </div>
+                    <div>
+                        <label for="contact" class="block text-sm font-medium text-gray-700">Main Contact</label>
+                        <input type="text" id="contact" name="contact" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-ref-blue focus:ring focus:ring-ref-blue focus:ring-opacity-50 transition duration-150 ease-in-out px-4 py-2 border">
+                    </div>
+                    <div>
+                        <label for="contact-date" class="block text-sm font-medium text-gray-700">Date of Contact</label>
+                        <input type="date" id="contact-date" name="contact-date" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-ref-blue focus:ring focus:ring-ref-blue focus:ring-opacity-50 transition duration-150 ease-in-out px-4 py-2 border">
+                    </div>
+                    <div>
+                        <label for="contact-type" class="block text-sm font-medium text-gray-700">Contact Type</label>
+                        <select id="contact-type" name="contact-type" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-ref-blue focus:ring focus:ring-ref-blue focus:ring-opacity-50 transition duration-150 ease-in-out px-4 py-2 border">
+                            <option value="Email">Email</option>
+                            <option value="Phone Call">Phone Call</option>
+                            <option value="Meeting">Meeting (In-person/Virtual)</option>
+                            <option value="Event">Event</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="activities" class="block text-sm font-medium text-gray-700">Activities Planned</label>
+                        <textarea id="activities" name="activities" rows="2" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-ref-blue focus:ring focus:ring-ref-blue focus:ring-opacity-50 transition duration-150 ease-in-out px-4 py-2 border"></textarea>
+                    </div>
+                    <div>
+                        <label for="outcome" class="block text-sm font-medium text-gray-700">Outcome</label>
+                        <textarea id="outcome" name="outcome" rows="2" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-ref-blue focus:ring focus:ring-ref-blue focus:ring-opacity-50 transition duration-150 ease-in-out px-4 py-2 border"></textarea>
+                    </div>
+                    <div>
+                        <label for="status" class="block text-sm font-medium text-gray-700">Status</label>
+                        <select id="status" name="status" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-ref-blue focus:ring focus:ring-ref-blue focus:ring-opacity-50 transition duration-150 ease-in-out px-4 py-2 border">
+                            <option value="Planned">Planned</option>
+                            <option value="In Progress">In Progress</option>
+                            <option value="Completed">Completed</option>
+                            <option value="Follow-up Needed">Follow-up Needed</option>
+                        </select>
+                    </div>
+                    <div class="col-span-1 md:col-span-2 lg:col-span-3">
+                        <label for="next-steps" class="block text-sm font-medium text-gray-700">Next Steps</label>
+                        <textarea id="next-steps" name="next-steps" rows="2" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-ref-blue focus:ring focus:ring-ref-blue focus:ring-opacity-50 transition duration-150 ease-in-out px-4 py-2 border"></textarea>
+                    </div>
+                </div>
+                <div class="flex justify-end mt-6">
+                    <button type="submit" id="submit-btn" class="inline-flex items-center px-6 py-2 border border-transparent text-base font-medium rounded-full shadow-sm text-white bg-ref-blue hover:bg-ref-blue-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-ref-blue-dark transition duration-150 ease-in-out transform hover:scale-105">
+                        Add Entry
+                    </button>
+                </div>
+            </form>
+        </section>
+
+        <!-- Engagement Table -->
+        <section>
+            <div class="flex justify-between items-center mb-4 flex-wrap gap-4">
+                <h2 class="text-2xl font-semibold text-gray-700">Engagement History</h2>
+                <div class="flex items-center gap-4">
+                    <input type="text" id="search-input" placeholder="Search by organization or contact" class="px-4 py-2 rounded-md border border-gray-300 shadow-sm focus:border-ref-blue focus:ring focus:ring-ref-blue focus:ring-opacity-50 transition duration-150 ease-in-out">
+                    <button id="export-btn" class="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-full text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition duration-150 ease-in-out transform hover:scale-105">
+                        Export to CSV
+                    </button>
+                </div>
+            </div>
+            <div class="table-container bg-white rounded-lg shadow-md">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Organization
+                            </th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Main Contact
+                            </th>
+                            <th col="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Contact Date
+                            </th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Contact Type
+                            </th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Activities Planned
+                            </th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Outcome
+                            </th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Status
+                            </th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Next Steps
+                            </th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Actions
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody id="engagement-table-body" class="bg-white divide-y divide-gray-200">
+                        <!-- Data will be inserted here -->
+                    </tbody>
+                </table>
+                <div id="no-data-message" class="text-center py-8 text-gray-500 hidden">
+                    No engagement data found. Add a new entry above!
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- Modal for showing full text -->
+    <div id="modal" class="modal hidden">
+        <div class="modal-content">
+            <span class="modal-close-btn">&times;</span>
+            <h3 id="modal-title" class="text-xl font-semibold text-gray-800 mb-4"></h3>
+            <p id="modal-text" class="text-gray-700 whitespace-pre-wrap"></p>
+            <div id="modal-action-buttons" class="flex justify-end mt-4 hidden">
+                <button id="modal-ok-btn" class="px-4 py-2 bg-ref-blue text-white rounded-md hover:bg-ref-blue-dark">OK</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const form = document.getElementById('engagement-form');
+        const tableBody = document.getElementById('engagement-table-body');
+        const exportBtn = document.getElementById('export-btn');
+        const searchInput = document.getElementById('search-input');
+        const formTitle = document.getElementById('form-title');
+        const submitBtn = document.getElementById('submit-btn');
+        const entryDocIdInput = document.getElementById('entry-doc-id');
+        const noDataMessage = document.getElementById('no-data-message');
+
+        // Modal elements
+        const modal = document.getElementById('modal');
+        const modalTitle = document.getElementById('modal-title');
+        const modalText = document.getElementById('modal-text');
+        const modalCloseBtn = document.querySelector('.modal-close-btn');
+        const modalActionButtons = document.getElementById('modal-action-buttons');
+        const modalOkBtn = document.getElementById('modal-ok-btn');
+
+        // Key for local storage
+        const STORAGE_KEY = 'ref_engagement_data';
+
+        let tableData = [];
+
+        // Helper function to show modal with custom content
+        function showModal(title, message, isError = false) {
+            modalTitle.textContent = title;
+            modalText.textContent = message;
+            if (isError) {
+                modalTitle.style.color = '#dc2626';
+            } else {
+                modalTitle.style.color = '#1f2937';
+            }
+            modal.classList.remove('hidden');
+            modalActionButtons.classList.remove('hidden');
+        }
+
+        // Handle modal close
+        modalCloseBtn.addEventListener('click', () => {
+            modal.classList.add('hidden');
+        });
+
+        modalOkBtn.addEventListener('click', () => {
+            modal.classList.add('hidden');
+        });
+
+        // Function to save data to local storage
+        function saveData() {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(tableData));
+        }
+
+        // Function to render the table rows from an array of data
+        function renderTable(data) {
+            if (data.length === 0) {
+                noDataMessage.classList.remove('hidden');
+            } else {
+                noDataMessage.classList.add('hidden');
+            }
+            
+            tableBody.innerHTML = '';
+            data.forEach((item) => {
+                const row = document.createElement('tr');
+                row.classList.add('hover:bg-gray-50');
+                row.innerHTML = `
+                    <td class="px-6 py-4 text-sm font-medium text-gray-900">${item.organization}</td>
+                    <td class="px-6 py-4 text-sm text-gray-500">${item.contact}</td>
+                    <td class="px-6 py-4 text-sm text-gray-500">${item.date}</td>
+                    <td class="px-6 py-4 text-sm text-gray-500">${item.type}</td>
+                    <td class="px-6 py-4 text-sm text-gray-500 cursor-pointer hover:underline text-blue-600 truncate max-w-xs" data-id="${item.id}" data-field="activities">${item.activities}</td>
+                    <td class="px-6 py-4 text-sm text-gray-500 cursor-pointer hover:underline text-blue-600 truncate max-w-xs" data-id="${item.id}" data-field="outcome">${item.outcome}</td>
+                    <td class="px-6 py-4">
+                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
+                        ${item.status === 'Completed' ? 'bg-green-100 text-green-800' : 
+                          item.status === 'In Progress' ? 'bg-blue-100 text-blue-800' :
+                          item.status === 'Follow-up Needed' ? 'bg-yellow-100 text-yellow-800' : 
+                          'bg-gray-100 text-gray-800'}">
+                            ${item.status}
+                        </span>
+                    </td>
+                    <td class="px-6 py-4 text-sm text-gray-500 cursor-pointer hover:underline text-blue-600 truncate max-w-xs" data-id="${item.id}" data-field="nextSteps">${item.nextSteps}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium flex gap-2">
+                        <button class="edit-btn text-blue-600 hover:text-blue-900 transition-colors" data-id="${item.id}">
+                            Edit
+                        </button>
+                        <button class="delete-btn text-red-600 hover:text-red-900 transition-colors" data-id="${item.id}">
+                            Delete
+                        </button>
+                    </td>
+                `;
+                tableBody.appendChild(row);
+            });
+            
+            // Attach event listeners for the modal pop-up
+            document.querySelectorAll('td[data-field]').forEach(cell => {
+                cell.addEventListener('click', (e) => {
+                    const id = e.target.dataset.id;
+                    const field = e.target.dataset.field;
+                    const data = tableData.find(item => item.id === id);
+                    if (data) {
+                        modalTitle.textContent = field.charAt(0).toUpperCase() + field.slice(1);
+                        modalText.textContent = data[field];
+                        modal.classList.remove('hidden');
+                        modalActionButtons.classList.add('hidden');
+                    }
+                });
+            });
+
+            // Attach event listeners to all action buttons
+            document.querySelectorAll('.delete-btn').forEach(button => {
+                button.addEventListener('click', (e) => {
+                    const idToDelete = e.target.getAttribute('data-id');
+                    tableData = tableData.filter(item => item.id !== idToDelete);
+                    saveData();
+                    renderTable(tableData);
+                    showModal('Success', 'Entry deleted successfully.');
+                });
+            });
+
+            document.querySelectorAll('.edit-btn').forEach(button => {
+                button.addEventListener('click', (e) => {
+                    const idToEdit = e.target.getAttribute('data-id');
+                    const item = tableData.find(d => d.id === idToEdit);
+
+                    if (item) {
+                        form.organization.value = item.organization;
+                        form.contact.value = item.contact;
+                        form['contact-date'].value = item.date;
+                        form['contact-type'].value = item.type;
+                        form.activities.value = item.activities;
+                        form.outcome.value = item.outcome;
+                        form.status.value = item.status;
+                        form['next-steps'].value = item.nextSteps;
+
+                        entryDocIdInput.value = idToEdit;
+                        formTitle.textContent = 'Edit Entry';
+                        submitBtn.textContent = 'Update Entry';
+                    } else {
+                        showModal('Error', 'Entry not found.', true);
+                    }
+                });
+            });
+        }
+
+        // Handle export to CSV
+        exportBtn.addEventListener('click', () => {
+            if (tableData.length === 0) {
+                showModal('No Data', 'No data to export!', true);
+                return;
+            }
+
+            const header = Object.keys(tableData[0]).join(',');
+            const csv = [
+                header,
+                ...tableData.map(row => Object.values(row).map(value => {
+                    let stringValue = String(value);
+                    if (stringValue.includes(',') || stringValue.includes('"')) {
+                        return `"${stringValue.replace(/"/g, '""')}"`;
+                    }
+                    return stringValue;
+                }).join(','))
+            ].join('\n');
+
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement("a");
+            const url = URL.createObjectURL(blob);
+            link.setAttribute("href", url);
+            link.setAttribute("download", "engagement_tracker.csv");
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        });
+
+        // Handle search input
+        searchInput.addEventListener('input', (e) => {
+            const searchTerm = e.target.value.toLowerCase();
+            const filteredData = tableData.filter(item => 
+                item.organization.toLowerCase().includes(searchTerm) ||
+                item.contact.toLowerCase().includes(searchTerm)
+            );
+            renderTable(filteredData);
+        });
+
+        // Handle form submission
+        form.addEventListener('submit', (e) => {
+            e.preventDefault();
+            
+            const entryData = {
+                id: entryDocIdInput.value || Date.now().toString(), // Use a timestamp for a unique ID
+                organization: form.organization.value,
+                contact: form.contact.value,
+                date: form['contact-date'].value,
+                type: form['contact-type'].value,
+                activities: form.activities.value,
+                outcome: form.outcome.value,
+                status: form.status.value,
+                nextSteps: form['next-steps'].value
+            };
+
+            const idToUpdate = entryDocIdInput.value;
+            if (idToUpdate) {
+                // Find and replace the existing entry
+                const index = tableData.findIndex(item => item.id === idToUpdate);
+                if (index !== -1) {
+                    tableData[index] = entryData;
+                }
+                showModal('Success', 'Entry updated successfully.');
+            } else {
+                // Add a new entry
+                tableData.push(entryData);
+                showModal('Success', 'Entry added successfully.');
+            }
+            
+            saveData();
+            renderTable(tableData);
+            
+            form.reset();
+            entryDocIdInput.value = "";
+            formTitle.textContent = 'Add New Entry';
+            submitBtn.textContent = 'Add Entry';
+        });
+
+        // Load data on page load
+        function loadData() {
+            const storedData = localStorage.getItem(STORAGE_KEY);
+            if (storedData) {
+                tableData = JSON.parse(storedData);
+            }
+            renderTable(tableData);
+        }
+
+        window.onload = loadData;
+    </script>
+</body>
+</html>
