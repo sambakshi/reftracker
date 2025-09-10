@@ -79,7 +79,7 @@
             <div class="flex items-center gap-4">
                 <!-- Logo container -->
                 <div class="w-12 h-12">
-                    <img src="Race Equality First - Logo - Primary - RGB.png" alt="Race Equality First Logo" class="w-full h-full object-contain">
+                    <img src="https://placehold.co/100x100/004b90/ffffff?text=REF" alt="Race Equality First Logo" class="w-full h-full object-contain">
                 </div>
                 <div>
                     <h1 class="text-2xl font-bold text-gray-900">Race Equality First</h1>
@@ -437,13 +437,7 @@
         const messageModalOkBtn = document.getElementById('modal-ok-btn');
 
         let tableData = [];
-
-        // Supabase Initialization
-        const supabaseUrl = 'https://vibeiarzzcebhicyiwes.supabase.co'; 
-        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZpYmVpYXJ6emNlYmhpY3lpd2VzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc0OTA4NTcsImV4cCI6MjA3MzA2Njg1N30.7EvprEyKbFLKgvNZuO4i3MCvhJ0RPet979F4LT-EMP4';
-        const supabase = Supabase.createClient(supabaseUrl, supabaseKey);
-        
-        console.log('Supabase client initialized:', supabase);
+        let supabase;
 
         // Helper function to show a message modal
         function showMessageModal(title, message, isError = false) {
@@ -697,11 +691,24 @@
         }
 
         // Supabase real-time listener
-        supabase.from('engagements').on('*', payload => {
+        // This subscription is made outside of `loadData` to prevent multiple listeners being attached
+        const channel = supabase.channel('table-db-changes').on('postgres_changes', { event: '*', schema: 'public', table: 'engagements' }, payload => {
             loadData();
         }).subscribe();
 
-        window.onload = loadData;
+
+        // This is a new function that encapsulates Supabase initialization and the initial data load
+        function initializeSupabaseAndLoadData() {
+            // Supabase Initialization
+            const supabaseUrl = 'https://vibeiarzzcebhicyiwes.supabase.co'; 
+            const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZpYmVpYXJ6emNlYmhpY3lpd2VzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc0OTA4NTcsImV4cCI6MjA3MzA2Njg1N30.7EvprEyKbFLKgvNZuO4i3MCvhJ0RPet979F4LT-EMP4';
+            supabase = Supabase.createClient(supabaseUrl, supabaseKey);
+            console.log('Supabase client initialized:', supabase);
+            loadData();
+        }
+
+        window.onload = initializeSupabaseAndLoadData;
+
     </script>
 </body>
 </html>
