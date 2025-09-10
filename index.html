@@ -690,20 +690,19 @@
             }
         }
 
-        // Supabase real-time listener
-        // This subscription is made outside of `loadData` to prevent multiple listeners being attached
-        const channel = supabase.channel('table-db-changes').on('postgres_changes', { event: '*', schema: 'public', table: 'engagements' }, payload => {
-            loadData();
-        }).subscribe();
-
-
-        // This is a new function that encapsulates Supabase initialization and the initial data load
         function initializeSupabaseAndLoadData() {
-            // Supabase Initialization
             const supabaseUrl = 'https://vibeiarzzcebhicyiwes.supabase.co'; 
             const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZpYmVpYXJ6emNlYmhpY3lpd2VzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc0OTA4NTcsImV4cCI6MjA3MzA2Njg1N30.7EvprEyKbFLKgvNZuO4i3MCvhJ0RPet979F4LT-EMP4';
             supabase = Supabase.createClient(supabaseUrl, supabaseKey);
             console.log('Supabase client initialized:', supabase);
+
+            // Subscribe to real-time changes after the client is initialized
+            supabase.channel('table-db-changes').on('postgres_changes', { event: '*', schema: 'public', table: 'engagements' }, payload => {
+                console.log('Change received!', payload);
+                loadData();
+            }).subscribe();
+
+            // Load data for the first time
             loadData();
         }
 
