@@ -76,9 +76,15 @@
     <div class="container mx-auto">
         <!-- Top Navigation & Header -->
         <header class="flex justify-between items-center mb-12">
-            <div>
-                <h1 class="text-2xl font-bold text-gray-900">Race Equality First</h1>
-                <p class="text-gray-500">Engagement Tracker Dashboard</p>
+            <div class="flex items-center gap-4">
+                <!-- Logo container -->
+                <div class="w-12 h-12">
+                    <img src="Race Equality First - Logo - Primary - RGB.png" alt="Race Equality First Logo" class="w-full h-full object-contain">
+                </div>
+                <div>
+                    <h1 class="text-2xl font-bold text-gray-900">Race Equality First</h1>
+                    <p class="text-gray-500">Engagement Tracker Dashboard</p>
+                </div>
             </div>
             <div class="flex gap-4">
                 <button id="export-btn" class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-full shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-100 transition-colors">
@@ -100,7 +106,6 @@
         <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6 mb-12">
             <div class="card flex items-start gap-4">
                 <span class="p-3 rounded-full bg-ref-gray text-gray-700">
-                    <!-- Icon changed to a list icon -->
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16" />
                     </svg>
@@ -257,7 +262,7 @@
                         </div>
                         <div>
                             <label for="contact-date" class="block text-sm font-medium text-gray-700 mb-1">Contact Date</label>
-                            <input type="date" id="contact-date" name="contact-date" required class="w-full rounded-lg px-4 py-3 border focus:ring focus:ring-opacity-50">
+                            <input type="date" id="contact-date" name="contact-date" required class="w-full rounded-lg px-4 py-3 border focus:ring focus:ring-opacity50">
                         </div>
                     </div>
                     <div class="mt-4">
@@ -294,7 +299,6 @@
                                 <option value="Training">Training</option>
                                 <option value="Workshop">Workshop</option>
                                 <option value="Event">Event</option>
-                                <option value="Other">Other</option>
                             </select>
                         </div>
                     </div>
@@ -429,7 +433,8 @@
         const messageModalCloseBtn = document.getElementById('message-modal-close-btn');
         const messageModalOkBtn = document.getElementById('modal-ok-btn');
 
-        const STORAGE_KEY = 'ref_engagement_data';
+        // The key used to store data in localStorage
+        const localStorageKey = 'ref_engagements_data';
         let tableData = [];
 
         // Helper function to show a message modal
@@ -446,12 +451,6 @@
 
         messageModalCloseBtn.addEventListener('click', () => messageModal.classList.add('hidden'));
         messageModalOkBtn.addEventListener('click', () => messageModal.classList.add('hidden'));
-
-        // Function to save data to local storage
-        function saveData() {
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(tableData));
-            updateMetrics();
-        }
 
         // Function to update the dashboard metrics
         function updateMetrics() {
@@ -483,7 +482,7 @@
                 row.innerHTML = `
                     <td class="px-6 py-4 text-sm font-medium text-gray-900">${item.organization}</td>
                     <td class="px-6 py-4 text-sm text-gray-500">${item.contact}</td>
-                    <td class="px-6 py-4 text-sm text-gray-500">${item.date}</td>
+                    <td class="px-6 py-4 text-sm text-gray-500">${item.contact_date}</td>
                     <td class="px-6 py-4">
                         <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
                         ${item.status === 'Completed' ? 'bg-green-100 text-green-800' : 
@@ -519,9 +518,7 @@
             document.querySelectorAll('.delete-btn').forEach(button => {
                 button.addEventListener('click', (e) => {
                     const idToDelete = e.target.getAttribute('data-id');
-                    tableData = tableData.filter(item => item.id !== idToDelete);
-                    saveData();
-                    renderTable(tableData);
+                    deleteEntry(idToDelete);
                     showMessageModal('Success', 'Entry deleted successfully.');
                 });
             });
@@ -529,20 +526,20 @@
             document.querySelectorAll('.edit-btn').forEach(button => {
                 button.addEventListener('click', (e) => {
                     const idToEdit = e.target.getAttribute('data-id');
-                    const item = tableData.find(d => d.id === idToEdit);
+                    const item = tableData.find(d => d.id == idToEdit);
 
                     if (item) {
                         form.organization.value = item.organization;
                         form.contact.value = item.contact;
-                        form['contact-email'].value = item.email;
-                        form['contact-phone'].value = item.phone;
-                        form['contact-date'].value = item.date;
-                        form['contact-type'].value = item.type;
-                        form['follow-up-date'].value = item.followUpDate || '';
+                        form['contact-email'].value = item.contact_email;
+                        form['contact-phone'].value = item.contact_phone;
+                        form['contact-date'].value = item.contact_date;
+                        form['contact-type'].value = item.contact_type;
+                        form['follow-up-date'].value = item.follow_up_date || '';
                         form.activities.value = item.activities;
                         form.status.value = item.status;
                         form.priority.value = item.priority;
-                        form['activity-type'].value = item.activityType;
+                        form['activity-type'].value = item.activity_type;
 
                         entryDocIdInput.value = idToEdit;
                         modalFormTitle.textContent = 'Edit Engagement';
@@ -557,19 +554,19 @@
             document.querySelectorAll('.view-btn').forEach(button => {
                 button.addEventListener('click', (e) => {
                     const idToView = e.target.getAttribute('data-id');
-                    const item = tableData.find(d => d.id === idToView);
+                    const item = tableData.find(d => d.id == idToView);
 
                     if (item) {
                         document.getElementById('view-organization').textContent = item.organization;
                         document.getElementById('view-contact').textContent = item.contact;
-                        document.getElementById('view-email').textContent = item.email;
-                        document.getElementById('view-phone').textContent = item.phone || 'N/A';
-                        document.getElementById('view-date').textContent = item.date;
-                        document.getElementById('view-contact-type').textContent = item.type;
-                        document.getElementById('view-follow-up-date').textContent = item.followUpDate || 'N/A';
+                        document.getElementById('view-email').textContent = item.contact_email;
+                        document.getElementById('view-phone').textContent = item.contact_phone || 'N/A';
+                        document.getElementById('view-date').textContent = item.contact_date;
+                        document.getElementById('view-contact-type').textContent = item.contact_type;
+                        document.getElementById('view-follow-up-date').textContent = item.follow_up_date || 'N/A';
                         document.getElementById('view-status').textContent = item.status;
                         document.getElementById('view-priority').textContent = item.priority;
-                        document.getElementById('view-activity-type').textContent = item.activityType;
+                        document.getElementById('view-activity-type').textContent = item.activity_type;
                         document.getElementById('view-activities').textContent = item.activities || 'No activities recorded.';
                         viewModal.classList.remove('hidden');
                     } else {
@@ -630,60 +627,88 @@
             const filteredData = tableData.filter(item => 
                 item.organization.toLowerCase().includes(searchTerm) ||
                 item.contact.toLowerCase().includes(searchTerm) ||
-                item.email.toLowerCase().includes(searchTerm)
+                item.contact_email.toLowerCase().includes(searchTerm)
             );
             renderTable(filteredData);
         });
 
         // Handle form submission
-        form.addEventListener('submit', (e) => {
+        form.addEventListener('submit', async (e) => {
             e.preventDefault();
             
             const entryData = {
-                id: entryDocIdInput.value || Date.now().toString(),
                 organization: form.organization.value,
                 contact: form.contact.value,
-                email: form['contact-email'].value,
-                phone: form['contact-phone'].value,
-                date: form['contact-date'].value,
-                type: form['contact-type'].value,
-                followUpDate: form['follow-up-date'].value,
+                contact_email: form['contact-email'].value,
+                contact_phone: form['contact-phone'].value,
+                contact_date: form['contact-date'].value,
+                contact_type: form['contact-type'].value,
+                follow_up_date: form['follow-up-date'].value,
                 activities: form.activities.value,
                 status: form.status.value,
                 priority: form.priority.value,
-                activityType: form['activity-type'].value,
+                activity_type: form['activity-type'].value,
             };
 
             const idToUpdate = entryDocIdInput.value;
             if (idToUpdate) {
-                const index = tableData.findIndex(item => item.id === idToUpdate);
-                if (index !== -1) {
-                    tableData[index] = entryData;
-                }
+                updateEntry(idToUpdate, entryData);
                 showMessageModal('Success', 'Entry updated successfully.');
             } else {
-                tableData.push(entryData);
+                addEntry(entryData);
                 showMessageModal('Success', 'Entry added successfully.');
             }
-            
-            saveData();
-            renderTable(tableData);
             
             form.reset();
             engagementModal.classList.add('hidden');
         });
 
-        // Load data on page load
+        /**
+         * Local Storage Functions
+         */
+        
+        // Save the current tableData to localStorage
+        function saveData() {
+            localStorage.setItem(localStorageKey, JSON.stringify(tableData));
+            loadData();
+        }
+
+        // Load data from localStorage
         function loadData() {
-            const storedData = localStorage.getItem(STORAGE_KEY);
-            if (storedData) {
-                tableData = JSON.parse(storedData);
-            }
+            const storedData = localStorage.getItem(localStorageKey);
+            tableData = storedData ? JSON.parse(storedData) : [];
+            // Sort data by contact_date in descending order
+            tableData.sort((a, b) => new Date(b.contact_date) - new Date(a.contact_date));
             renderTable(tableData);
             updateMetrics();
         }
+        
+        // Add a new entry to the data
+        function addEntry(entry) {
+            // Generate a simple unique ID for the entry
+            entry.id = Date.now().toString();
+            tableData.push(entry);
+            saveData();
+        }
 
+        // Update an existing entry
+        function updateEntry(id, updatedEntry) {
+            const index = tableData.findIndex(item => item.id === id);
+            if (index > -1) {
+                tableData[index] = { ...tableData[index], ...updatedEntry };
+                saveData();
+            }
+        }
+
+        // Delete an entry
+        function deleteEntry(id) {
+            tableData = tableData.filter(item => item.id !== id);
+            saveData();
+        }
+
+        // Initial load of data when the page loads
         window.onload = loadData;
+
     </script>
 </body>
 </html>
